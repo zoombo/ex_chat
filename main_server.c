@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/epoll.h>
 
 /*
  * 
@@ -30,6 +31,63 @@
 /*
  * 
  */
+#define MAX_CLIENTS_S 100
+
+struct sock_list {
+    int count;
+    int s32clients_fd[MAX_CLIENTS_S];
+};
+
+struct chatter_parms {
+    struct sock_list *s32_list;
+    int signal_sock;
+};
+
+/*
+ * 
+ */
+
+void* chatter(void* parms) {
+    
+    // Постараемся пока не пользовать мьютексы.
+    struct chatter_parms *cast_parms = parms;
+    struct sock_list *sl = cast_parms->s32_list;
+
+    struct epoll_event ev, *events = malloc(sizeof (struct epoll_event) * MAX_CLIENTS_S);
+    memset(events, 0, sizeof(struct epoll_event)*MAX_CLIENTS_S);
+    
+    int epoll_fd, number_fds;
+
+    epoll_fd = epoll_create1(0);
+
+    if (epoll_fd == -1) {
+        printf("epoll_create1 error.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    ev.events = EPOLLIN;
+    ev.data.fd = cast_parms->signal_sock;
+    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, cast_parms->signal_sock, &ev);
+    
+    while (true) {
+        
+        number_fds = epoll_wait(epoll_fd, events, MAX_CLIENTS_S, -1);
+        
+        if (sl->count > 0) {
+            for (int i = 0; i < sl->count; i++) {
+                
+            }
+        }
+    }
+
+}
+
+int add_sock(struct sock_list *sl, int s32sock_fd) {
+    // TODO: эта функция добавляет сокет подсоединившегося клиента к списку
+    // обрабатываемых сокетов.
+    return 0;
+}
+
 int main(int argc, char** argv) {
 
     int status = 0;
@@ -39,6 +97,10 @@ int main(int argc, char** argv) {
         printf("Error create socket.\n");
         return -1;
     }
+
+    int optval = 1;
+    // set SO_REUSEADDR on a socket to true (1):
+    setsockopt(s32listener_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
@@ -55,28 +117,34 @@ int main(int argc, char** argv) {
         printf("Error listen socket.\n");
         return -1;
     }
-    //sets
 
     int s32accept_fd = 0;
-    char *msg = "Hello!";
-    char buf[1024];
-    for (int i = 0; i < 1; i++) {
+    /*
+        char *msg = "Hello!";
+        char buf[1024];
+     */
+    //for (int i = 0; i < 1; i++) {
+    while (true) {
 
         s32accept_fd = accept(s32listener_fd, 0, 0);
-        send(s32accept_fd, msg, strlen(msg), 0);
+        /*
+            send(s32accept_fd, msg, strlen(msg), 0);
 
-        int recv_len = 0;
-        recv_len = recv(s32accept_fd, buf, sizeof (buf), 0);
+            int recv_len = 0;
+            recv_len = recv(s32accept_fd, buf, sizeof (buf), 0);
 
-        for (int i = 0; i < recv_len; i++) {
-            putchar(*(buf + i));
-        }
-        nl;
+            for (int i = 0; i < recv_len; i++) {
+                putchar(*(buf + i));
+            }
+            nl;
 
-        //send(s32accept_fd, msg, strlen(msg), 0);
+            //send(s32accept_fd, msg, strlen(msg), 0);
 
-        shutdown(s32accept_fd, SHUT_RDWR);
-        close(s32accept_fd);
+            shutdown(s32accept_fd, SHUT_RDWR);
+            close(s32accept_fd);
+         */
+
+        // add_sock()
 
     }
     shutdown(s32listener_fd, SHUT_RDWR);
