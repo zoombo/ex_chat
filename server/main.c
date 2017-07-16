@@ -53,10 +53,11 @@ void* chatter(void* parms) {
     
     // Приводим принятую структуру к нужной нам.
     struct chatter_parms *cast_parms = parms;
-    // Создаем структуру
+    // thr_sl - структура которая будет хранить список сокетов
+    // с которыми работаем в данный момент.
     struct sock_list thr_sl = {}, *sl = cast_parms->s32_list;
 
-    struct epoll_event ev, *events = malloc(sizeof (struct epoll_event) * MAX_CLIENTS_S);
+    struct epoll_event ev = {}, *events = malloc(sizeof (struct epoll_event) * MAX_CLIENTS_S);
     memset(events, 0, sizeof(struct epoll_event)*MAX_CLIENTS_S);
     
     int epoll_fd, number_fds;
@@ -105,11 +106,17 @@ int main(int argc, char** argv) {
     }
 
     int optval = 1;
-    // set SO_REUSEADDR on a socket to true (1):
+    /* Когда мы закрываем сокет, он продолжает висеть некоторое время с 
+     * состоянием TIME_WAIT и пока ОС его не закроет сокет с такими же 
+     * параметрами (с таким же портом) открыть нельзя.
+     * setsockopt можно задать параметр SO_REUSEADDR и тогда сокет можно
+     * использовать повторно сразуже.
+     */
     setsockopt(s32listener_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
+    // Повесить на все доступные интерфейсы.
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     status = bind(s32listener_fd, (struct sockaddr*) &serv_addr, sizeof (serv_addr));
