@@ -49,8 +49,11 @@ struct chatter_parms {
 
 void* chatter(void* parms) {
     
-    // Постараемся пока не пользовать мьютексы.
+    // TODO: Постараемся пока не пользовать мьютексы.
+    
+    // Приводим принятую структуру к нужной нам.
     struct chatter_parms *cast_parms = parms;
+    // Создаем структуру
     struct sock_list thr_sl = {}, *sl = cast_parms->s32_list;
 
     struct epoll_event ev, *events = malloc(sizeof (struct epoll_event) * MAX_CLIENTS_S);
