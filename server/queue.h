@@ -29,7 +29,7 @@ struct queue {
 /// \param user_socket - сокет пользователя которому 
 /// будут отправляется сообщения из данной очереди.
 /// \return - если ошибка вернется -1, иначе 0.
-struct queue *new_queue(int messages_count, int user_socket);
+struct queue *new_queue(int messages_max_count, int user_socket);
 
 /// Добавить сообщение в очередь.
 /// \param q
