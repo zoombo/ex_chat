@@ -21,36 +21,25 @@
 #include <stdbool.h>
 #include <string.h>
 #include <sys/epoll.h>
-
 /*
  * 
  */
-#define PORT 4400
+#include "queue.h"
+#include "chatter2.h"
+/*
+ * 
+ */
+
 #define nl printf("\n")
-
-/*
- * 
- */
-#define MAX_CLIENTS_S 100
-
-struct sock_list {
-    int count;
-    int s32clients_fd[MAX_CLIENTS_S];
-};
-
-struct chatter_parms {
-    struct sock_list *s32_list;
-    int signal_sock;
-};
 
 /*
  * 
  */
 
 void* chatter(void* parms) {
-    
+
     // TODO: Постараемся пока не пользовать мьютексы.
-    
+
     // Приводим принятую структуру к нужной нам.
     struct chatter_parms *cast_parms = parms;
     // thr_sl - структура которая будет хранить список сокетов
@@ -58,8 +47,8 @@ void* chatter(void* parms) {
     struct sock_list thr_sl = {}, *sl = cast_parms->s32_list;
 
     struct epoll_event ev = {}, *events = malloc(sizeof (struct epoll_event) * MAX_CLIENTS_S);
-    memset(events, 0, sizeof(struct epoll_event)*MAX_CLIENTS_S);
-    
+    memset(events, 0, sizeof (struct epoll_event)*MAX_CLIENTS_S);
+
     int epoll_fd, number_fds;
 
     epoll_fd = epoll_create1(0);
@@ -72,14 +61,14 @@ void* chatter(void* parms) {
     ev.events = EPOLLIN;
     ev.data.fd = cast_parms->signal_sock;
     epoll_ctl(epoll_fd, EPOLL_CTL_ADD, cast_parms->signal_sock, &ev);
-    
+
     // Один клиент уже есть - это основной поток с сигнальным сокетом.
     // thr_sl.count++;
-    
+
     while (true) {
-        
+
         number_fds = epoll_wait(epoll_fd, events, MAX_CLIENTS_S, -1);
-        
+
         if (sl->count > 0) {
             for (int i = 0; i < sl->count && thr_sl.count < MAX_CLIENTS_S; i++) {
                 thr_sl.s32clients_fd[thr_sl.count + i] = sl->s32clients_fd[i];
@@ -132,32 +121,22 @@ int main(int argc, char** argv) {
     }
 
     int s32accept_fd = 0;
-    /*
-        char *msg = "Hello!";
-        char buf[1024];
-     */
-    //for (int i = 0; i < 1; i++) {
+    char *msg = "Hello!";
+    char buf[1024];
+    struct queue *clients[MAX_CLIENTS_S] = {};
+    int clients_count = 0;
+    
+    
+    
     while (true) {
 
         s32accept_fd = accept(s32listener_fd, 0, 0);
-        /*
-            send(s32accept_fd, msg, strlen(msg), 0);
-
-            int recv_len = 0;
-            recv_len = recv(s32accept_fd, buf, sizeof (buf), 0);
-
-            for (int i = 0; i < recv_len; i++) {
-                putchar(*(buf + i));
-            }
-            nl;
-
-            //send(s32accept_fd, msg, strlen(msg), 0);
-
-            shutdown(s32accept_fd, SHUT_RDWR);
-            close(s32accept_fd);
-         */
-
-        // add_sock()
+        
+        clients[clients_count] = new_queue(MAX_MESSAGES, s32accept_fd);
+        add_message(clients[0], msg);
+        send_msg(clients[0]);
+        
+        
 
     }
     shutdown(s32listener_fd, SHUT_RDWR);

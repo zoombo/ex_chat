@@ -1,12 +1,12 @@
 CC=gcc
 CFLAGS=-std=c11 -Wall -ggdb
 
-all:main oth
-	$(CC) $(CFLAGS) -lncurses -lpthread main.o helpers.o -o ex_chat
+all:main
+	$(CC) $(CFLAGS) -lncurses -lpthread main.o -o ex_chat
 main:
 	$(CC) $(CFLAGS) -lncurses -lpthread -c main.c
-oth:
-	$(CC) $(CFLAGS) -lncurses -lpthread -c helpers.c
+#oth:
+#	$(CC) $(CFLAGS) -lncurses -lpthread -c helpers.c
 clean:
 	rm ex_chat *.o
 
