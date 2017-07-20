@@ -13,7 +13,7 @@ struct queue *new_queue(int messages_max_count, int user_socket) {
     // int mess_list_len = sizeof(char*) *messages_count; // Неверно.
     // Массив указателей на сообщения.
     q->msg_list = malloc(sizeof (char*) *messages_max_count);
-    memset(q->msg_list, NULL, sizeof (char*) *messages_max_count);
+    memset(q->msg_list, 0, sizeof (char*) *messages_max_count);
 
     *((int*) (&(q->msg_max_count))) = messages_max_count;
 
@@ -75,6 +75,9 @@ int send_msg(struct queue *q) {
             *(q->msg_list + i) = *(q->msg_list + (i + 1));
         }
     }
+    q->msg_list[q->msg_count] = NULL;
+    q->msg_count--;
+    
     return 0;
 }
 

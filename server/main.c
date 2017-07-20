@@ -26,9 +26,15 @@
  */
 #include "queue.h"
 #include "chatter2.h"
+
 /*
  * 
  */
+
+// Функция заглушка для неиспользуемых переменных.
+void pass(void *v) {
+    return;
+}
 
 #define nl printf("\n")
 
@@ -50,7 +56,8 @@ void* chatter(void* parms) {
     memset(events, 0, sizeof (struct epoll_event)*MAX_CLIENTS_S);
 
     int epoll_fd, number_fds;
-
+    pass((void*)&number_fds);
+    
     epoll_fd = epoll_create1(0);
 
     if (epoll_fd == -1) {
@@ -122,21 +129,21 @@ int main(int argc, char** argv) {
 
     int s32accept_fd = 0;
     char *msg = "Hello!";
-    char buf[1024];
-    struct queue *clients[MAX_CLIENTS_S] = {};
+    //    char buf[1024];
+    struct queue * clients[MAX_CLIENTS_S] = {};
     int clients_count = 0;
-    
-    
-    
+
+
+
     while (true) {
 
         s32accept_fd = accept(s32listener_fd, 0, 0);
-        
+
         clients[clients_count] = new_queue(MAX_MESSAGES, s32accept_fd);
         add_message(clients[0], msg);
         send_msg(clients[0]);
-        
-        
+
+
 
     }
     shutdown(s32listener_fd, SHUT_RDWR);

@@ -10,6 +10,7 @@
  *
  * Created on 19 июля 2017 г., 14:05
  */
+#include <pthread.h>
 
 #ifndef CHATTER2_H
 #define CHATTER2_H
@@ -20,6 +21,7 @@
  * 
  */
 #define MAX_CLIENTS_S 100
+#define ZNULL 0
 
 struct sock_list {
     int count;
@@ -28,6 +30,14 @@ struct sock_list {
 
 struct chatter_parms {
     struct sock_list *s32_list;
+    int signal_sock;
+};
+
+struct chatter2_parms {
+    int s32clients_fd[MAX_CLIENTS_S];
+    int clients_received_count;
+    int clients_available;
+    pthread_mutex_t mmutex;
     int signal_sock;
 };
 
