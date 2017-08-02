@@ -10,5 +10,10 @@ oth:
 clean:
 	rm ex_chat_server *.o
 
-
+	
+build-tests:
+	$(CC) $(CFLAGS) -lncurses -lpthread ./Tests/chatter_test.c chatter2.c -o chatter_test
+test:
+	./chatter_test
+	
 #gcc -std=c11 -Wall -lpthread -c async_copy.c

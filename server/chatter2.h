@@ -41,7 +41,8 @@ struct chatter2_parms {
     int signal_sock;
 };
 
-void* chatter2(void* parms);
+//void* chatter2(void* parms);
+int merge_sock_lists(struct sock_list *dst_l, struct sock_list *src_l);
 
 #endif /* CHATTER2_H */
 

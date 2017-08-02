@@ -30,7 +30,7 @@ void* chatter2(void* parms) {
     memset(events, 0, sizeof (struct epoll_event) * MAX_CLIENTS_S);
 
     int epoll_fd, number_fds;
-    pass((void*)&number_fds);
+    //pass((void*) &number_fds);
 
     epoll_fd = epoll_create1(0);
 
@@ -82,5 +82,35 @@ void* chatter2(void* parms) {
     }
 
 }
+
+/// Добавляет в список dst_l сокеты из списка src_l пока есть места в dst_l.
+/// После добавления элемента в dst_l удаляет его из src_l.
+/// \param dst_l
+/// \param src_l
+/// \return количество сокетов оставшихся в src_l.
+
+int merge_sock_lists(struct sock_list *dst_l, struct sock_list *src_l) {
+
+    if (dst_l->count >= MAX_CLIENTS_S) {
+        return src_l->count;
+    }
+
+    for (int loop_count = src_l->count; loop_count > 0; loop_count--) {
+        // Ищем первый пустой элемент в dst списке и добавляем в него последний
+        // элемент списка src.
+        for (int i = 0; i < MAX_CLIENTS_S; i++)
+            if (dst_l->s32clients_fd[i] == ZNULL) {
+                dst_l->s32clients_fd[i] = src_l->s32clients_fd[src_l->count - 1];
+                src_l->s32clients_fd[src_l->count - 1] = ZNULL;
+                src_l->count--;
+                dst_l->count++;
+                break;
+            }
+    }
+    return src_l->count;
+
+}
+
+
 
 
